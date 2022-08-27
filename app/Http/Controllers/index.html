@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Category Client</h1>
+        <div class="alert alert-warning err d-none">
+            Cannot connect to API server.
+        </div>
+        <ul class="list-group"></ul>
+        <div class="input-group">
+            <input type="text" id="new" class="form-control">
+            <button class="btn btn-primary">ADD</button>
+        </div>
+    </div>
+    <script>
+        const api = "http://localhost:8000/api/categories";
+
+        document.querySelector("button").onclick = function() {
+            let text = document.querySelector("#new").value;
+            let li = document.createElement("li");
+
+            li.classList.add("list-group-item");
+            li.textContent = text;
+            document.querySelector("ul").appendChild(li);
+
+            document.querySelector("#new").value = "";
+            document.querySelector("#new").focus();
+
+            fetch(api, {
+                method: "post",
+                body: JSON.stringify({name: text}),
+                headers: {
+                    "content-type": "application/json"
+                }
+            });
+        }
+
+        fetch(api).then(function(res) {
+            return res.json();
+        }).then(function(json) {
+            json.map(function(category) {
+                let li = document.createElement("li");
+                li.classList.add("list-group-item");
+                li.textContent = category.name;
+                li.ondblclick = function() {
+                    let text = prompt("Enter Update category");
+                    li.textContent = text;
+                    fetch(`$(api)/$(category.id)`, {
+                        method: "put",
+                        body: JSON.stringify({ name: text }),
+                        headers: {
+                            "content-type": "application/json"
+                        }
+                    });
+                }
+
+                let del = document.createElement("a");
+                del.setAttribute("href", "a");
+                del.classList.add("btn-close", "float-end");
+                del.onclick = function() {
+                    del.parentNode.remove();
+                    fetch(`$(api)/$(category,id)`, {method: "delete"});
+                }
+                li.appendChild(del);
+
+                document.querySelector("ul").appendChild(li);
+            });
+        }).catch(function() {
+            // document.querySelector(".err").style.display = "block";
+            document.querySelector(".err").classList.remove("d-none");
+        });
+    </script>
+</body>
+</html>
